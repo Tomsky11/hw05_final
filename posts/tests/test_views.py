@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 import shutil
 import tempfile
 
@@ -8,17 +9,16 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
-
 from posts.models import Group, Post
 
 User = get_user_model()
+tmp_media_root = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         author = User.objects.create_user(username='Test_user')
         pub_date = dt.datetime.now().date()
         small_gif = (
@@ -60,7 +60,7 @@ class PostPagesTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        shutil.rmtree(tmp_media_root, ignore_errors=True)
         super().tearDownClass()
 
     def setUp(self):
@@ -87,7 +87,7 @@ class PostPagesTests(TestCase):
             first_object.text: 'Тестовый текст',
             first_object.author.username: 'Test_user',
             first_object.group.title: 'Test_group',
-            first_object.image: 'posts/small.gif'
+            first_object.image.name: 'posts/small.gif'
         }
         for actual, expected in index_page_context.items():
             with self.subTest():
@@ -99,9 +99,10 @@ class PostPagesTests(TestCase):
             reverse('posts:group', kwargs={'slug': 'Test_group_slug'})
         )
         test_context = response.context['page'][0]
+        image_name, _ = os.path.splitext('posts/small.gif')
         self.assertEqual(test_context.group.title, 'Test_group')
         self.assertEqual(test_context.group.slug, 'Test_group_slug')
-        self.assertEqual(test_context.image, 'posts/small.gif')
+        self.assertIn(image_name, test_context.image.name)
 
     def test_new_shows_correct_context(self):
         '''Шаблон new.html сформирован с правильным контекстом.'''
@@ -137,7 +138,7 @@ class PostPagesTests(TestCase):
         )
         self.assertEqual(response.context['author'].username, 'Test_user')
         self.assertEqual(response.context['post'].id, 1)
-        self.assertEqual(response.context['post'].image, 'posts/small.gif')
+        self.assertEqual(response.context['post'].image.name, 'posts/small.gif')
 
     def test_profile_shows_correct_context(self):
         '''Шаблон profile.html сформирован с правильным контекстом.'''
@@ -150,7 +151,7 @@ class PostPagesTests(TestCase):
             first_object.text: 'Тестовый текст',
             first_object.author.username: 'Test_user',
             first_object.group.title: 'Test_group',
-            first_object.image: 'posts/small.gif'
+            first_object.image.name: 'posts/small.gif'
         }
         for actual, expected in index_page_context.items():
             with self.subTest():

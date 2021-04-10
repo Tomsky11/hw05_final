@@ -31,7 +31,7 @@ def group_posts(request, slug):
 
 @login_required
 def new_post(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(request.POST or None, files=request.FILES or None)
     if request.method == 'POST' and form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
@@ -91,23 +91,25 @@ def page_not_found(request, exception):
 def server_error(request):
     return render(request, 'misc/500.html', status=500)
 
-'''
+
 @login_required
 def add_comment(request, username, post_id):
-    post = get_object_or_404(Post, author=username, id=post_id)
+    post = get_object_or_404(Post, author__username=username, id=post_id)
     form = CommentForm(request.POST or None)
     post_kwargs = {'username': username, 'post_id': post_id}
     if request.method == 'POST' and form.is_valid():
         comment = form.save(commit=False)
+        comment.post = post
         comment.author = request.user
         comment.save()
     return redirect(reverse('posts:post', kwargs=post_kwargs))
-    return render(request, 'posts/new.html', {'form': form, 'post': post})
+#    return render(request, 'posts/new.html', {'form': form, 'post': post})
+
+
 '''
-
-
 def add_comment(request, username, post_id):
     form = PostForm(request.POST or None)
     author = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, author=author, id=post_id)
     return render(request, 'posts/post.html', {'form': form, 'post': post})
+'''

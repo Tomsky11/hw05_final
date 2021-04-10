@@ -12,13 +12,13 @@ from posts.forms import PostForm
 from posts.models import Group, Post
 
 User = get_user_model()
+tmp_media_root = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         author = User.objects.create_user(username='Test_user')
         pub_date = dt.datetime.now().date()
         group = Group.objects.create(
@@ -33,7 +33,7 @@ class PostFormTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        shutil.rmtree(tmp_media_root, ignore_errors=True)
         super().tearDownClass()
 
     def setUp(self):
