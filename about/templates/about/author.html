@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+{% load user_filters %}
+  <main role="main" class="container">
+    <div class="row">
+      <!-- Левый вспомогательный блок -->
+      <div class="col-md-3 mb-3 mt-1">
+        <div class="card">
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <div class="h3">
+                  Об авторе
+                </div> 
+              </li>
+              <li class="list-group-item">
+                <div class="h6 text-muted">
+                  Контакты: <br>
+                  Tomsky11@yandex.ru
+                  <a href="https://github.com/Tomsky11">GitHub</a>                  
+                </div>
+              </li>
+            </ul>                                               
+          </div>                    
+        </div>                
+      </div>
+      <!-- Тело страницы -->
+      <div class="col-md-9">
+        <div class="card-body">                    
+          <div class="card-text">
+            <p>
+                Я пришла в мир программирования в результате кризиса "мне почти 30, что
+                я делаю со своей жизнью, пора что-то менять".
+            </p>
+            <p>
+                Выбрала именно программирование, потому что имею высшее образование по специальности
+                "Прикладная математика и информатика".
+            </p>
+            <p>
+                Т.к. практических навыков после окончания университета не приобрела, пока что
+                чувствую себя слепым котенком. Но настроена оптимистично.
+            </p>
+          </div>                    
+        </div>                
+      </div>            
+    </div>        
+  </main>
+{% endblock %}
