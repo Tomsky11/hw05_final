@@ -125,3 +125,8 @@ class PostURLTests(TestCase):
         ''' Правильный шаблон для post_edit.'''
         response = self.authorized_client_2.get(self.url_name_post_edit)
         self.assertTemplateUsed(response, 'posts/new.html')
+
+    def test_page_not_found_return_correct_status_code(self):
+        ''' Сервер возвращает код 404, если страница не найдена.'''
+        response = self.guest_client.get('/nonexistent/')
+        self.assertEqual(response.status_code, 404)

@@ -3,7 +3,7 @@
 
 {% if user.is_authenticated %}
 <div class="card my-4">
-    <form method="post">
+    <form method="post" action="{% url 'posts:add_comment' post.author.username post.id %}">
         {% csrf_token %}
         <h5 class="card-header">Добавить комментарий:</h5>
         <div class="card-body">
@@ -21,12 +21,17 @@
 <div class="media card mb-4">
     <div class="media-body card-body">
         <h5 class="mt-0">
-            <a href="{% url 'profile' item.author.username %}"
+            <a href="{% url 'posts:profile' item.author.username %}"
                name="comment_{{ item.id }}">
                 {{ item.author.username }}
             </a>
         </h5>
         <p>{{ item.text | linebreaksbr }}</p>
+        <small class="text-muted">{{ item.created}}</small>
     </div>
 </div>
 {% endfor %}
+
+{% if page.has_other_pages %}
+    {% include "paginator.html" with items=page paginator=paginator%}
+{% endif %}

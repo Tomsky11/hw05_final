@@ -9,65 +9,56 @@
                             <div class="card-body">
                                     <div class="h2">
                                         <!-- Имя автора -->
-                                        {{ author.get_full_name }}
+                                        Имя: {{ author.get_full_name }}
                                     </div>
                                     <div class="h3 text-muted">
-                                         <!-- username автора -->
-                                         {{ author }}
+                                        <!-- username автора -->
+                                        Логин: {{ author }}
                                     </div>
                             </div>
                             <ul class="list-group list-group-flush">
                                     <li class="list-group-item">
                                             <div class="h6 text-muted">
-                                            Подписчиков: XXX <br />
-                                            Подписан: XXX
+                                            Подписчиков: {{ author.following.count }} <br/>
+                                            Подписан: {{ author.follower.count }}
                                             </div>
                                     </li>
                                     <li class="list-group-item">
                                             <div class="h6 text-muted">
                                                 <!-- Количество записей -->
-                                                Записей: {{ posts_author.count }}
+                                                Записей: {{ author.posts.count }}
                                             </div>
                                     </li>
                             </ul>
                     </div>
+                {% if author != user %}
+                    <li class="list-group-item">
+                        {% if following %}
+                        <a class="btn btn-lg btn-light" 
+                                href="{% url 'posts:profile_unfollow' author.username %}" role="button"> 
+                                Отписаться 
+                        </a> 
+                        {% else %}                        
+                        <a class="btn btn-lg btn-primary" 
+                                href="{% url 'posts:profile_follow' author.username %}" role="button">
+                        Подписаться 
+                        </a>
+                        {% endif %}
+                {% endif %}
+                    </li> 
             </div>
 
             <div class="col-md-9">                
+                <!-- Вывод ленты записей -->
+                {% for post in page %}
+                        {% include "posts/post_item.html" with post=post %}
+                {% endfor %}
 
-        {% for post in page %}
-                <!-- Начало блока с отдельным постом --> 
-                    <div class="card mb-3 mt-1 shadow-sm">
-                        {% load thumbnail %}
-                        {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
-                            <img class="card-img" src="{{ im.url }}">
-                        {% endthumbnail %}
-                            <div class="card-body">
-                                    <p class="card-text">
-                                            <!-- Ссылка на страницу автора в атрибуте href; username автора в тексте ссылки -->
-                                            <a href="{% url 'posts:profile' author %}"><strong class="d-block text-gray-dark">@{{ author }}</strong></a>
-                                            <!-- Текст поста -->
-                                            {{ post.text|linebreaksbr }}
-                                    </p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                            <div class="btn-group ">
-                                                    <!-- Ссылка на страницу записи в атрибуте href-->
-                                                    <a class="btn btn-sm text-muted" href="{% url 'posts:post' author.username post.id %}" role="button">Добавить комментарий</a>
-                                                    <!-- Ссылка на редактирование, показывается только автору записи -->
-                                                    <a class="btn btn-sm text-muted" href="{% url 'posts:post_edit' author post.id %}" role="button">Редактировать</a>
-                                            </div>
-                                            <!-- Дата публикации  -->
-                                            <small class="text-muted">{{ post.pub_date|date:"d M Y" }}</small>
-                                    </div>
-                            </div>
-                    </div>
-                <!-- Конец блока с отдельным постом --> 
-        {% endfor %}
-                <!-- Остальные посты -->  
-
-            <br>
-            {% include 'paginator.html' %}
-     </div>
+                <!-- Вывод паджинатора --> 
+                {% if page.has_other_pages %}
+                        {% include "paginator.html" with items=page paginator=paginator%}
+                {% endif %}
+            </div>
     </div>
 </main>
 

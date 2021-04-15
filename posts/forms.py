@@ -21,3 +21,4 @@ class CommentForm(forms.ModelForm):
         error_messages = {'text':
                           {'required':
                            'Пожалуйста, введите текст Вашего комментария'}}
+        widgets = {'text': forms.Textarea(attrs={'rows': 3}), }

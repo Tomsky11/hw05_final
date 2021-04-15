@@ -9,18 +9,18 @@
                         <div class="card-body">
                                 <div class="h2">
                                     <!-- Имя автора -->
-                                    {{ author.get_full_name }}
+                                    Имя: {{ author.get_full_name }}
                                 </div>
                                 <div class="h3 text-muted">
                                      <!-- username автора -->
-                                     {{ author }}
+                                     Логин: {{ author }}
                                 </div>
                         </div>
                         <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                         <div class="h6 text-muted">
-                                        Подписчиков: XXX <br />
-                                        Подписан: XXX
+                                        Подписчиков: {{ author.following.count }} <br/>
+                                        Подписан: {{ author.follower.count }}
                                         </div>
                                 </li>
                                 <li class="list-group-item">
@@ -45,21 +45,20 @@
                             <div class="card-body">
                                     <p class="card-text">
                                             <!-- Ссылка на страницу автора в атрибуте href; username автора в тексте ссылки -->
-                                            <a href="{% url 'posts:profile' author %}"><strong class="d-block text-gray-dark">@{{ author }}</strong></a>
+                                            <a href="{% url 'posts:profile' author %}"><strong class="d-block text-gray-dark">@{{ post.author.username }}</strong></a>
                                             <!-- Текст поста -->
                                             {{ post.text|linebreaksbr }}
                                     </p>
 
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group ">
-                                                <a class="btn btn-sm text-muted" href="{% url 'posts:post' author.username post.id %}" role="button">Добавить комментарий</a>
-                                                <!-- Ссылка на редактирование, показывается только автору записи 
-                                                не работает-->
+                                                <!-- Ссылка на редактирование, показывается только автору записи -->
                                                 <a class="btn btn-sm text-muted" href="{% url 'posts:post_edit' author post.id %}" role="button">Редактировать</a>
                                         </div>
                                         <!-- Дата публикации  -->
-                                        <small class="text-muted">{{ post.pub_date|date:"d M Y" }}</small>
-                                </div>
+                                        <small class="text-muted">{{ post.pub_date}}</small>
+                                    </div>
+                                {% include 'posts/comments.html' %}
                             </div>
                     </div>              
          </div>

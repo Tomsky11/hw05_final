@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Последние обновления на сайте{% endblock %}
+{% block title %}Подписки{% endblock %}
 {% block content %}
 
 
 
 <div class="container">
-{% include "posts/menu.html" with index=True %}
+{% include "posts/menu.html" with follow=True %}
   {% load cache %}
-    {% cache 20 index_page page.number %}
+    {% cache 20 follow_page page.number %}
     <h1> Последние обновления на сайте</h1>
      <!-- Вывод ленты записей -->
          {% for post in page %}

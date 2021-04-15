@@ -7,14 +7,16 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from posts.models import Group, Post
+from django.core.cache import cache
+from posts.models import Follow, Group, Post
 
 User = get_user_model()
 tmp_media_root = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
+@override_settings(MEDIA_ROOT=tmp_media_root)
 class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -99,10 +101,9 @@ class PostPagesTests(TestCase):
             reverse('posts:group', kwargs={'slug': 'Test_group_slug'})
         )
         test_context = response.context['page'][0]
-        image_name, _ = os.path.splitext('posts/small.gif')
         self.assertEqual(test_context.group.title, 'Test_group')
         self.assertEqual(test_context.group.slug, 'Test_group_slug')
-        self.assertIn(image_name, test_context.image.name)
+        self.assertIn(test_context.image.name, 'posts/small.gif')
 
     def test_new_shows_correct_context(self):
         '''Шаблон new.html сформирован с правильным контекстом.'''
@@ -138,7 +139,8 @@ class PostPagesTests(TestCase):
         )
         self.assertEqual(response.context['author'].username, 'Test_user')
         self.assertEqual(response.context['post'].id, 1)
-        self.assertEqual(response.context['post'].image.name, 'posts/small.gif')
+        self.assertEqual(response.context['post'].image.name,
+                         'posts/small.gif')
 
     def test_profile_shows_correct_context(self):
         '''Шаблон profile.html сформирован с правильным контекстом.'''
@@ -176,6 +178,74 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(url_name)
         post = self.post
         self.assertNotEqual(post, response.context.get('page'))
+
+    def test_cache(self):
+        response_1 = self.authorized_client.get(reverse('posts:index')).content
+        author = self.user
+        pub_date = dt.datetime.now().date()
+        post = Post.objects.create(
+            text='Второй тестовый текст',
+            pub_date=pub_date,
+            author=author,
+            group=self.group
+        )
+        response_2 = self.authorized_client.get(reverse('posts:index')).content
+        self.assertEqual(response_1, response_2)
+        cache.clear()
+        response_3 = self.authorized_client.get(reverse('posts:index')).content
+        self.assertNotEqual(response_1, response_3)
+
+    def test_authorized_client_allowed_to_follow_and_unfollow(self):
+        '''Авторизованный пользователь может подписываться и отписываться.'''
+        user = self.user
+        author = self.post.author
+        follow_url = reverse('posts:profile_follow',
+                             kwargs={'username': author})
+        self.authorized_client.get(follow_url)
+        follow_exsts = Follow.objects.filter(
+            user=user,
+            author=author
+        ).exists()
+        self.assertTrue(follow_exsts)
+        unfollow_url = reverse('posts:profile_unfollow',
+                               kwargs={'username': author})
+        self.authorized_client.get(unfollow_url)
+        follow_exsts = Follow.objects.filter(
+            user=user,
+            author=author
+        ).exists()
+        self.assertFalse(follow_exsts)
+
+    def test_new_post_exists_at_follow_page_for_follower(self):
+        '''Новый пост появляется на странице избранных авторов подписчика
+        и не появляется у не подписчика.'''
+        follow_url = reverse('posts:profile_follow',
+                             kwargs={'username': self.user})
+        self.authorized_client_2.get(follow_url)
+        add_new_post = self.authorized_client.post(
+            reverse('posts:new_post'),
+            {'text': 'Тест постов избранных авторов'},
+            follow=True
+        )
+        url_name = (reverse('posts:follow_index'))
+        response = self.authorized_client_2.get(url_name)
+        self.assertIn(add_new_post.context['page'][0].text,
+                      response.context['page'][0].text)
+        user_3 = User.objects.create_user(username='User_3')
+        authorized_client_3 = Client()
+        authorized_client_3.force_login(user_3)
+        response_3 = authorized_client_3.get(url_name)
+        self.assertNotIn(add_new_post.context['page'][0].text,
+                         response_3.context['page'])
+
+    def test_only_authorized_client_allowed_add_comment(self):
+        '''Только авторизованный пользователь может оставлять комментарий.'''
+        author = self.post.author
+        post_id = self.post.id
+        post_kwargs = {'username': author, 'post_id': post_id}
+        add_comment_page = reverse('posts:add_comment', kwargs=post_kwargs)
+#        response_1 = self.authorized_client.get(add_comment_page)
+#        self.assertEqual(response_1.status_code, 200)
 
 
 class PaginatorViewsTest(TestCase):

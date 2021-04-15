@@ -7,9 +7,10 @@ User = get_user_model()
 class Post(models.Model):
     text = models.TextField(verbose_name='Текст публикации',
                             help_text='Введите текст публикации')
-    pub_date = models.DateTimeField('date published', auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               related_name='posts')
+    pub_date = models.DateTimeField('Дата публикации',
+                                    auto_now_add=True, db_index=True)
+    author = models.ForeignKey(User, verbose_name='Автор публикации',
+                               on_delete=models.CASCADE, related_name='posts')
     group = models.ForeignKey(
         'Group',
         on_delete=models.SET_NULL,
@@ -19,7 +20,12 @@ class Post(models.Model):
         verbose_name='Сообщество',
         help_text='Выберите группу'
     )
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to='posts/',
+        blank=True,
+        null=True,
+        verbose_name='Картинка'
+    )
 
     class Meta:
         ordering = ('-pub_date',)
@@ -31,9 +37,10 @@ class Post(models.Model):
 
 
 class Group(models.Model):
-    title = models.CharField('group', max_length=200)
+    title = models.CharField('Сообщество', max_length=200, unique=True)
     slug = models.SlugField('slug', max_length=100, unique=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(verbose_name='Описание',
+                                   null=True, blank=True)
 
     class Meta:
         verbose_name = 'Сообщество'
@@ -47,15 +54,35 @@ class Comment(models.Model):
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
+        verbose_name='Публикация'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
+        verbose_name='Автор комментария'
     )
     text = models.TextField(
         verbose_name='Текст комментария',
         help_text='Введите комментарий'
     )
-    created = models.TimeField(auto_now_add=True)
+    created = models.DateTimeField('Дата комментария', auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created',)
+        verbose_name = 'Комеентарий'
+        verbose_name_plural = 'Комментарии'
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
