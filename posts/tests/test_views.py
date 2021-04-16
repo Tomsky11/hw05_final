@@ -1,5 +1,4 @@
 import datetime as dt
-import os
 import shutil
 import tempfile
 
@@ -10,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.core.cache import cache
-from posts.models import Follow, Group, Post
+from posts.models import Comment, Follow, Group, Post
 
 User = get_user_model()
 tmp_media_root = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -238,14 +237,31 @@ class PostPagesTests(TestCase):
         self.assertNotIn(add_new_post.context['page'][0].text,
                          response_3.context['page'])
 
-    def test_only_authorized_client_allowed_add_comment(self):
-        '''Только авторизованный пользователь может оставлять комментарий.'''
-        author = self.post.author
-        post_id = self.post.id
-        post_kwargs = {'username': author, 'post_id': post_id}
-        add_comment_page = reverse('posts:add_comment', kwargs=post_kwargs)
-#        response_1 = self.authorized_client.get(add_comment_page)
-#        self.assertEqual(response_1.status_code, 200)
+    def test_authorized_client_allowed_to_add_comment(self):
+        '''Авторизованный пользователь может оставлять комментарий.'''
+        comment_count = Comment.objects.count()
+        comment = {'text': 'Оставляем комментарий'}
+        self.authorized_client.post(
+            reverse('posts:add_comment',
+                    kwargs={'username': self.post.author,
+                            'post_id': self.post.id}),
+            data=comment,
+            follow=True
+        )
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+
+    def test_guest_client_not_allowed_to_add_comment(self):
+        '''Неавторизованный пользователь не может оставлять комментарий.'''
+        comment_count = Comment.objects.count()
+        comment = {'text': 'Оставляем комментарий'}
+        self.guest_client.post(
+            reverse('posts:add_comment',
+                    kwargs={'username': self.post.author,
+                            'post_id': self.post.id}),
+            data=comment,
+            follow=True
+        )
+        self.assertEqual(Comment.objects.count(), comment_count)
 
 
 class PaginatorViewsTest(TestCase):

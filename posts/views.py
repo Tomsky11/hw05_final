@@ -68,7 +68,7 @@ def post_view(request, username, post_id):
                    'post': post,
                    'comments': comments,
                    'form': form}
-    )
+                  )
 
 
 @login_required
