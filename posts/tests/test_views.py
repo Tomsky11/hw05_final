@@ -182,7 +182,7 @@ class PostPagesTests(TestCase):
         response_1 = self.authorized_client.get(reverse('posts:index')).content
         author = self.user
         pub_date = dt.datetime.now().date()
-        post = Post.objects.create(
+        Post.objects.create(
             text='Второй тестовый текст',
             pub_date=pub_date,
             author=author,
