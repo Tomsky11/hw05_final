@@ -86,6 +86,34 @@ class PostFormTests(TestCase):
             ).exists()
         )
 
+    def test_new_post_upload_only_image_file(self):
+        '''Новый пост не создать с файлом, не являющимся картинкой.'''
+        group = Group.objects.get(title='Test_group')
+        test_text = 'Это текстовый файл, а не картинка'.encode()
+        text_file = SimpleUploadedFile(
+            name='my_text.txt',
+            content=test_text,
+            content_type='text/plain'
+        )
+        form_data = {
+            'text': 'Еще один тестовый текст',
+            'group': group.id,
+            'image': text_file
+        }
+        response = self.authorized_client.post(
+            reverse('posts:new_post'),
+            data=form_data,
+            follow=True
+        )
+        self.assertFormError(
+            response,
+            form='form',
+            field='image',
+            errors='Загрузите правильное изображение. '
+                   'Файл, который вы загрузили, '
+                   'поврежден или не является изображением.'
+        )
+
     def test_edit_post(self):
         '''Отредактированный пост сохраняется и выполняется переадресация
         на страницу поста.

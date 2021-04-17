@@ -194,8 +194,8 @@ class PostPagesTests(TestCase):
         response_3 = self.authorized_client.get(reverse('posts:index')).content
         self.assertNotEqual(response_1, response_3)
 
-    def test_authorized_client_allowed_to_follow_and_unfollow(self):
-        '''Авторизованный пользователь может подписываться и отписываться.'''
+    def test_authorized_client_allowed_to_follow(self):
+        '''Авторизованный пользователь может подписываться.'''
         user = self.user
         author = self.post.author
         follow_url = reverse('posts:profile_follow',
@@ -206,6 +206,14 @@ class PostPagesTests(TestCase):
             author=author
         ).exists()
         self.assertTrue(follow_exsts)
+
+    def test_authorized_client_allowed_to_unfollow(self):
+        '''Авторизованный пользователь может отписываться.'''
+        user = self.user
+        author = self.post.author
+        follow_url = reverse('posts:profile_follow',
+                             kwargs={'username': author})
+        self.authorized_client.get(follow_url)
         unfollow_url = reverse('posts:profile_unfollow',
                                kwargs={'username': author})
         self.authorized_client.get(unfollow_url)

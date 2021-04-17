@@ -81,7 +81,7 @@ class PostURLTests(TestCase):
             follow=True
         )
         self.assertRedirects(
-            response, '/auth/login/?next=/new/')
+            response, f"/auth/login/?next={reverse('posts:new_post')}")
 
     def test_post_edit_url_is_not_available_for_not_author(self):
         '''Страница post_edit недоступна не автору.'''
@@ -101,7 +101,9 @@ class PostURLTests(TestCase):
         на страницу просмотра поста.
         '''
         response = self.authorized_client.get(self.url_name_post_edit)
-        self.assertRedirects(response, '/Test_user/1/')
+        post_url = reverse('posts:post',
+                           kwargs={'username': 'Test_user', 'post_id': 1})
+        self.assertRedirects(response, post_url)
 
     def test_post_edit_redirect_anonymous_on_admin_login(self):
         '''Страница по адресу post_edit перенаправит анонимного
@@ -111,7 +113,9 @@ class PostURLTests(TestCase):
             self.url_name_post_edit,
             follow=True
         )
-        self.assertRedirects(response, '/auth/login/?next=/Test_user/1/edit/')
+        post_edit_url = reverse('posts:post_edit',
+                                kwargs={'username': 'Test_user', 'post_id': 1})
+        self.assertRedirects(response, f'/auth/login/?next={post_edit_url}')
 
     def test_urls_uses_correct_template(self):
         '''URL-адрес использует соответствующий шаблон.'''
