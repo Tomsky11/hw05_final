@@ -26,10 +26,7 @@ SECRET_KEY = 'p7+g&t#0m4$8lv-&wq8yu+%!$e0&*wa-izz&_r_-8%28au@(5a'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost',
     '127.0.0.1',
-    '[::1]',
-    'testserver',
 ]
 
 
@@ -68,7 +65,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'context_processors.year',
+                'yatube.context_processors.year',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -138,7 +135,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = 'posts:index'
-# LOGOUT_REDIRECT_URL = 'posts:index'
+LOGOUT_REDIRECT_URL = 'posts:index'
 
 #  подключаем движок filebased.EmailBackend
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

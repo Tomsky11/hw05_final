@@ -71,7 +71,7 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ('-created',)
-        verbose_name = 'Комеентарий'
+        verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
 
@@ -88,6 +88,8 @@ class Follow(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [models.UniqueConstraint(
             fields=['user', 'author'], name='unique_object'
         )]
