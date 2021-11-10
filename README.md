@@ -5,7 +5,7 @@ Yatube - это социальная сеть. Пользователям пре
 
 Клонируем репозиторий
 
-````https://github.com/Tomsky11/hw05_final```
+```https://github.com/Tomsky11/hw05_final```
 
 Устанавливаем зависимости
 
@@ -18,4 +18,12 @@ Yatube - это социальная сеть. Пользователям пре
 Собираем статику
 
 ```python manage.py collectstatic```
+
+Заполняем БД начальными данными
+
+```python manage.py loaddata dump.json```
+
+Запускаем проект
+
+```python manage.py runserver```
 

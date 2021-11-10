@@ -21,7 +21,6 @@ class Post(models.Model):
         help_text='Выберите группу'
     )
     image = models.ImageField(
-        upload_to='posts/',
         blank=True,
         null=True,
         verbose_name='Картинка'

@@ -25,7 +25,7 @@ def group_posts(request, slug):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(request,
-                  'group.html',
+                  'posts/group.html',
                   {'group': group, 'page': page})
 
 
