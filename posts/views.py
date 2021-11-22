@@ -19,6 +19,7 @@ def index(request):
 
 
 def group_posts(request, slug):
+    '''Для постов конкретной группы'''
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     paginator = Paginator(posts, 5)
@@ -117,6 +118,7 @@ def add_comment(request, username, post_id):
 
 @login_required
 def follow_index(request):
+    '''Для страницы Избранных авторов'''
     latest = Post.objects.filter(author__following__user=request.user)
     paginator = Paginator(latest, 10)
     page_number = request.GET.get('page')
